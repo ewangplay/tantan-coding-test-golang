@@ -10,9 +10,9 @@ import (
 
 func main() {
 	router := mux.NewRouter()
-	router.HandleFunc("/users", UsersHandler)
-	router.HandleFunc("/users/{user_id}/relationships", GetRelationShipsHandler)
-	router.HandleFunc("/users/{user_id}/relationships/{other_user_id}", PutRelationShipsHandler)
+	router.HandleFunc("/users", UsersHandler).Methods("GET", "POST")
+    router.HandleFunc("/users/{user_id:[0-9]+}/relationships", GetRelationShipsHandler).Methods("GET")
+	router.HandleFunc("/users/{user_id:[0-9]+}/relationships/{other_user_id:[0-9]+}", PutRelationShipsHandler).Methods("PUT")
 
 	err := http.ListenAndServe(":8090", router)
 	if err != nil {
