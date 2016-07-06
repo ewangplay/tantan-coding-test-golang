@@ -13,12 +13,11 @@ func main() {
     var err error
 
     //create PostGreSQL adaptor
-    host := "127.0.0.1"
-    port := "5432"
+    addr := "127.0.0.1:5432"
     user := "dbuser"
     pass := "dogtutu"
     dbname := "tantan_db"
-    g_pgAdaptor, err = NewPgAdaptor(host, port, user, pass, dbname)
+    g_pgAdaptor, err = NewPgAdaptor(addr, user, pass, dbname)
     if err != nil {
         fmt.Printf("Create PostGreSQL adaptor error: %v\n", err)
         os.Exit(1)

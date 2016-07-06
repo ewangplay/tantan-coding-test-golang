@@ -2,18 +2,17 @@ package main
 
 import (
 	"fmt"
-	"gopkg.in/pg.v3"
+	"gopkg.in/pg.v4"
 )
 
 type PgAdaptor struct {
 	db *pg.DB
 }
 
-func NewPgAdaptor(host, port, user, pass, dbname string) (*PgAdaptor, error) {
+func NewPgAdaptor(addr, user, pass, dbname string) (*PgAdaptor, error) {
 	dbAdaptor := &PgAdaptor{}
 	dbAdaptor.db = pg.Connect(&pg.Options{
-		Host:     host,
-		Port:     port,
+        Addr:     addr,
 		User:     user,
 		Password: pass,
 		Database: dbname,
@@ -28,12 +27,12 @@ func (this *PgAdaptor) Release() {
 	}
 }
 
-func (this *PgAdaptor) Query(coll pg.Collection, query string, args ...interface{}) error {
+func (this *PgAdaptor) Query(model, query interface{}, params ...interface{}) error {
 	if this.db == nil {
 		return fmt.Errorf("database object invalid")
 	}
 
-	_, err := this.db.Query(coll, query, args...)
+	_, err := this.db.Query(model, query, params...)
 	if err != nil {
 		return err
 	}
@@ -41,12 +40,12 @@ func (this *PgAdaptor) Query(coll pg.Collection, query string, args ...interface
 	return nil
 }
 
-func (this *PgAdaptor) QueryOne(record interface{}, query string, args ...interface{}) error {
+func (this *PgAdaptor) QueryOne(model, query interface{}, params ...interface{}) error {
 	if this.db == nil {
 		return fmt.Errorf("database object invalid")
 	}
 
-	_, err := this.db.QueryOne(record, query, args...)
+	_, err := this.db.QueryOne(model, query, params...)
 	if err != nil {
 		return err
 	}
@@ -54,12 +53,12 @@ func (this *PgAdaptor) QueryOne(record interface{}, query string, args ...interf
 	return nil
 }
 
-func (this *PgAdaptor) Exec(query string, args ...interface{}) error {
+func (this *PgAdaptor) Exec(query interface{}, params ...interface{}) error {
 	if this.db == nil {
 		return fmt.Errorf("database object invalid")
 	}
 
-	_, err := this.db.Exec(query, args...)
+	_, err := this.db.Exec(query, params...)
 	if err != nil {
 		return err
 	}
@@ -80,7 +79,7 @@ func (this *PgAdaptor) BeginTransaction() (*pg.Tx, error) {
 	return tx, nil
 }
 
-func (this *PgAdaptor) ExecTransaction(tx *pg.Tx, query string, args ...interface{}) error {
+func (this *PgAdaptor) ExecTransaction(tx *pg.Tx, query string, params ...interface{}) error {
 	if this.db == nil {
 		return fmt.Errorf("database object invalid")
 	}
@@ -91,7 +90,7 @@ func (this *PgAdaptor) ExecTransaction(tx *pg.Tx, query string, args ...interfac
 	}
 	defer smt.Close()
 
-	_, err = smt.Exec(args...)
+	_, err = smt.Exec(params...)
 	if err != nil {
 		return err
 	}
