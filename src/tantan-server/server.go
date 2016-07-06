@@ -1,41 +1,40 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gorilla/mux"
-	"io"
 	"net/http"
 	"os"
+    "fmt"
 )
 
+var g_pgAdaptor *PgAdaptor
+
 func main() {
+    var err error
+
+    //create PostGreSQL adaptor
+    host := "127.0.0.1"
+    port := "5432"
+    user := "dbuser"
+    pass := "dogtutu"
+    dbname := "tantan_db"
+    g_pgAdaptor, err = NewPgAdaptor(host, port, user, pass, dbname)
+    if err != nil {
+        fmt.Printf("Create PostGreSQL adaptor error: %v\n", err)
+        os.Exit(1)
+    }
+    defer g_pgAdaptor.Release()
+
+    //create http request router
 	router := mux.NewRouter()
 	router.HandleFunc("/users", UsersHandler).Methods("GET", "POST")
-    router.HandleFunc("/users/{user_id:[0-9]+}/relationships", GetRelationShipsHandler).Methods("GET")
-	router.HandleFunc("/users/{user_id:[0-9]+}/relationships/{other_user_id:[0-9]+}", PutRelationShipsHandler).Methods("PUT")
+	router.HandleFunc("/users/{user_id:[0-9]+}/relationships", GetRelationshipsHandler).Methods("GET")
+	router.HandleFunc("/users/{user_id:[0-9]+}/relationships/{peer_user_id:[0-9]+}", SetRelationshipsHandler).Methods("PUT")
 
-	err := http.ListenAndServe(":8090", router)
+    //statup http server
+	err = http.ListenAndServe(":8090", router)
 	if err != nil {
+        fmt.Printf("Startup http server error: %v\n", err)
 		os.Exit(1)
 	}
-}
-
-func UsersHandler(w http.ResponseWriter, r *http.Request) {
-	io.WriteString(w, "UsersHandler OK!")
-}
-
-func GetRelationShipsHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	user_id := vars["user_id"]
-    result := fmt.Sprintf("GetRelationShipsHandler %v OK!", user_id)
-	io.WriteString(w, result)
-}
-
-func PutRelationShipsHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	user_id := vars["user_id"]
-    other_user_id := vars["other_user_id"]
-    result := fmt.Sprintf("PutRelationShipsHandler %v:%v OK!", user_id, other_user_id)
-
-	io.WriteString(w, result)
 }
