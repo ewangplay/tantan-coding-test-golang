@@ -100,8 +100,8 @@ func AddUser(r *http.Request) (result string, err error) {
 
 func GenerateUserID() (id string, err error) {
 	//This just a temporary solution.
-	//In fact, here need to lock，
-	// and need to save the last value at somewhere when server exias.
+	//In fact, here need to lock to ensure the uniqueness of the user ID,
+	// and need to save the last value at somewhere when server exits.
 	g_userIdSeed++
 	return fmt.Sprintf("%v", g_userIdSeed), nil
 }

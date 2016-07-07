@@ -16,6 +16,7 @@ const (
 	GET_STATE_ONE_TO_ONE               string = `SELECT state from relationship_tbl WHERE user_id=? AND peer_user_id = ?`
 	UPDATE_STATE_ONE_TO_ONE            string = `UPDATE relationship_tbl SET state = ? WHERE user_id=? AND peer_user_id=?`
 	CREATE_OR_UPDATE_USER_RELATIONSHIP string = `INSERT INTO relationship_tbl(user_id, peer_user_id, state, type) VALUES(?, ?, ?, ?) ON CONFLICT (user_id, peer_user_id) DO UPDATE SET state = ?`
+	GET_USER_BY_ID                     string = `SELECT name FROM user_tbl WHERE id=?`
 )
 
 ///////////////////////////////////////////////////////////////////////////
@@ -80,6 +81,20 @@ func SetRelationshipsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func SetUserRelationship(user_id, peer_user_id string, r *http.Request) (result string, err error) {
+	//check the validity of User ID
+	//First, you can't build relatioship with yourself
+	if user_id == peer_user_id {
+		return "", fmt.Errorf("same as the target user!")
+	}
+
+	//Second, mast be valid user id
+	if !IsValidUser(user_id) {
+		return "", fmt.Errorf("%v is not a valid user", user_id)
+	}
+	if !IsValidUser(peer_user_id) {
+		return "", fmt.Errorf("%v is not a valid user", peer_user_id)
+	}
+
 	//read the body data
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil && err != io.EOF {
@@ -100,6 +115,11 @@ func SetUserRelationship(user_id, peer_user_id string, r *http.Request) (result 
 	if rs.State == "" {
 		return "", fmt.Errorf("state field empty!")
 	}
+
+	//Updating Relationship should be an atomic operation,
+	//so using sync mutex to make sure of it.
+	g_rsLocker.Lock()
+	defer g_rsLocker.Unlock()
 
 	//Retrieve the state for peer_user_id to user_id
 	var peer_rs TT_Relationship
@@ -143,4 +163,13 @@ func SetUserRelationship(user_id, peer_user_id string, r *http.Request) (result 
 	}
 
 	return string(rb), nil
+}
+
+func IsValidUser(user_id string) bool {
+	var user TT_User
+	err := g_pgAdaptor.QueryOne(&user, GET_USER_BY_ID, user_id)
+	if err != nil {
+		return false
+	}
+	return true
 }
