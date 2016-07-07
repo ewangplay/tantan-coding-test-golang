@@ -29,7 +29,12 @@ func GetRelationshipsHandler(w http.ResponseWriter, r *http.Request) {
 
 	result, err = GetUserRelationship(user_id)
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		result = fmt.Sprintf("[ERROR] %v", err)
+	} else {
+		header := w.Header()
+		header.Add("Content-Type", "application/json")
+		header.Add("charset", "UTF-8")
 	}
 
 	io.WriteString(w, result)
@@ -63,7 +68,12 @@ func SetRelationshipsHandler(w http.ResponseWriter, r *http.Request) {
 
 	result, err = SetUserRelationship(user_id, peer_user_id, r)
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		result = fmt.Sprintf("[ERROR] %v", err)
+	} else {
+		header := w.Header()
+		header.Add("Content-Type", "application/json")
+		header.Add("charset", "UTF-8")
 	}
 
 	io.WriteString(w, result)
