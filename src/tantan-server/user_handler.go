@@ -11,7 +11,7 @@ import (
 var g_userIdSeed int64
 
 const (
-	GET_ALL_USERS_SQL string = `SELECT * from user_tbl`
+	GET_ALL_USERS_SQL string = `SELECT id,name,type from user_tbl`
     ADD_USER_SQL string = `INSERT INTO user_tbl(id, name, type) VALUES(?,?,?)`
 )
 

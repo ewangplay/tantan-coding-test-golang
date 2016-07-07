@@ -28,9 +28,10 @@ psql -U dbuser -d tantan_db -h 127.0.0.1 -p 5432
 |type|varchar(32)|data type|
 
 CREATE TABLE user_tbl(
-    id VARCHAR(64), 
-    name VARCHAR(32),
-    type VARCHAR(32)
+    id VARCHAR(64) NOT NULL DEFAULT '', 
+    name VARCHAR(32) NOT NULL DEFAULT '',
+    type VARCHAR(32) NOT NULL DEFAULT '',
+    PRIMARY KEY (id)
 );
 ```
 
@@ -39,16 +40,17 @@ CREATE TABLE user_tbl(
 
 |field|type|description|
 |-----|----|-----------|
-|id|varchar(64)|user id|
-|user_id|varchar(64)|related user id|
+|user_id|varchar(64)|user id|
+|peer_user_id|varchar(64)|peer user id|
 |state|varchar(32)|user relationship|
 |type|varchar(32)|data type|
 
 CREATE TABLE relationship_tbl(
-    id VARCHAR(64),
-    user_id VARCHAR(64), 
-    state VARCHAR(32),
-    type VARCHAR(32)
+    user_id VARCHAR(64) NOT NULL DEFAULT '',
+    peer_user_id VARCHAR(64) NOT NULL DEFAULT '', 
+    state VARCHAR(32) NOT NULL DEFAULT '',
+    type VARCHAR(32) NOT NULL DEFAULT '',
+    PRIMARY KEY (user_id, peer_user_id)
 );
 ```
 
